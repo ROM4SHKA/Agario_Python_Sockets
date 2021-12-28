@@ -1,4 +1,5 @@
-# Agario_Python_Sockets
-laba
+Firstly: pip install pygame
 
-ROMA done server client protocol
+Secondly: Run server.py 
+
+and run client.py as many times as you want
