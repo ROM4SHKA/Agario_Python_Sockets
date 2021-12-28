@@ -2,6 +2,7 @@ import socket
 import  time
 import pygame
 
+
 WIDTH = 1000
 HEIGHT = 800
 colours = {'0': (255, 255, 0), '1': (255, 0, 0), '2': (0, 255, 0),
@@ -14,7 +15,7 @@ def draw_opponents(data, screen):
         y = HEIGHT // 2 + int(j[1])
         r = int(j[2])
         c = colours[j[3]]
-        pygame.draw.circle(screen, c, (x, y), r)
+
 def find(strn):
     first_o = None
     for i in range(len(strn)):
@@ -27,11 +28,11 @@ def find(strn):
     return ''
 
 
+
 local_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 local_s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 local_s.connect(('localhost', 10000))
 
-my_colour = local_s.recv(16).decode()
 
 pygame.init()
 sc = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -68,6 +69,7 @@ while is_game_running:
     pygame.draw.circle(sc, colours[my_colour], (WIDTH//2, HEIGHT//2), 50)
     if data!=['']:
         draw_opponents(data, sc)
+
     pygame.display.update()
 pygame.quit()
 #python client.py

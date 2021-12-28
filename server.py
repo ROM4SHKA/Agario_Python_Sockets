@@ -5,7 +5,9 @@ import pygame
 WIDTH_ROOM, HEIGHT_ROOM = 5000, 5000
 WIDTH_SERVER_WINDOW, HEIGHT_SERVER_WINDOW = 300, 300
 FPS = 100
+
 START_SIZE = 50
+
 colours = {'0': (255, 255, 0), '1': (255, 0, 0), '2': (0, 255, 0),
            '3':(0, 255,255), '4': (255, 34, 178)}
 def find(strn):
@@ -36,7 +38,9 @@ class Player():
         self.speed_y = 0
     def change_speed(self, v):
         if v[0] == 0 and v[1] == 0:
+
             pass
+
         else:
             len_vector = (v[0]**2 + v[1]**2) ** 0.5
             v = (v[0]/len_vector, v[1]/len_vector)
@@ -44,6 +48,7 @@ class Player():
             self.speed_x, self.speed_y = v[0], v[1]
 
     def update(self):
+
         if self.x - self.r <= 0:
             if self.speed_x >= 0:
                 self.x += self.speed_x
@@ -65,6 +70,7 @@ class Player():
                 self.y += self.speed_y
 
         #self.abs_speed = 50 / (self.r ** 0.5)
+
 
 
 main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -92,11 +98,13 @@ while is_server_running:
                             random.randint(0, WIDTH_ROOM),
                             random.randint(0, HEIGHT_ROOM),
                             START_SIZE, str(random.randint(0,4)))
+
         new_player.conn.send(new_player.colour.encode())
         players.append(new_player)
 
     except:
         pass
+
 
     for p in players:
         try:
@@ -117,6 +125,7 @@ while is_server_running:
             dist_y = players[j].y - players[i].y
 
 
+
             if ((abs(dist_x)<= (players[i].w_vision)//2+players[j].r) and (abs(dist_y)<= (players[i].h_vision)//2+players[j].r)):
                 if (dist_x**2+dist_y**2)**0.5 <= players[i].r and players[i].r> 1.1*players[j].r:
                     #change r
@@ -129,6 +138,7 @@ while is_server_running:
                 visible_players[i].append(_x+' '+_y+' '+_r+' '+_c)
             if ((abs(dist_x) <= (players[j].w_vision) // 2 + players[i].r) and (
                     abs(dist_y) <= (players[j].h_vision) // 2 + players[i].r)):
+
                 if (dist_x**2+dist_y**2)**0.5 <= players[j].r and players[j].r> 1.1*players[i].r:
                     #change r
                     players[i].r, players[i].speed_y, players[i].speed_x = 0 , 0 , 0
@@ -145,7 +155,9 @@ while is_server_running:
     for i in range(len(players)):
         try:
             players[i].conn.send(responce[i].encode())
+
             print(responce[i])
+
             players[i].errors = 0
         except:
             players[i].errors += 1
