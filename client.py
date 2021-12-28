@@ -2,6 +2,19 @@ import socket
 import  time
 import pygame
 
+def find(strn):
+    first_o = None
+    for i in range(len(strn)):
+        if strn[i] == '<':
+            first_o = i
+        if strn[i] == '>' and first_o != None:
+            close = i
+            res = strn[first_o + 1: close]
+            res = list(map(int, res.split(',')))
+            return res
+    return ''
+
+
 WIDTH = 1000
 HEIGHT = 800
 
@@ -30,13 +43,14 @@ while is_game_running:
     if len(v) > 0 and v != old_v:
         old_v = v
         message = '<' + str(v[0])+',' + str(v[1])+'>'
-        print(message)
+
 
         local_s.send(message.encode())
 
     data = local_s.recv(1024)
     data = data.decode()
-
+    data = find(data)
+    print('receive', data)
     sc.fill('grey50')
     pygame.draw.circle(sc, (255, 0, 0), (WIDTH//2, HEIGHT//2), 50)
     pygame.display.update()

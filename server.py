@@ -3,11 +3,23 @@ import random
 import pygame
 
 WIDTH_ROOM, HEIGHT_ROOM = 5000, 5000
-WIDTH_SERVER_WINDOW, HEIGHT_SERVER_WINDOW = 400, 400
+WIDTH_SERVER_WINDOW, HEIGHT_SERVER_WINDOW = 300, 300
 FPS = 100
-START_SIZE = 15
+START_SIZE = 20
 colours = {'0': (255, 255, 0), '1': (255, 0, 0), '2': (0, 255, 0),
            '3':(0, 255,255), '4': (255, 34, 178)}
+def find(strn):
+    first_o = None
+    for i in range(len(strn)):
+        if strn[i]=='<':
+            first_o =i
+        if strn[i] =='>' and first_o !=None:
+            close = i
+            res = strn[first_o+1: close]
+            res = list(map(int, res.split(',')))
+            return res
+    return  ''
+
 class Player():
     def __init__(self, conn, addr, x, y, r, colour):
         self.conn = conn
@@ -16,11 +28,22 @@ class Player():
         self.y = y
         self.r = r
         self.colour = colour
-
+        self.w_vision = 1000
+        self.h_vision = 800
         self.errors = 0
+        self.abs_speed = 1
+        self.speed_x = 0
+        self.speed_y = 0
+    def change_speed(self, v):
+        if v[0] == 0 and v[1] == 0:
+            self.x = 0
+            self.y = 0
+        else:
+            len_vector = (v[0]**2 + v[1]**2) ** 0.5
+            v = (v[0]/len_vector, v[1]/len_vector)
+            v = (v[0] * self.abs_speed, v[1] * self.abs_speed)
+            self.speed_x, self.speed_y = v[0], v[1]
 
-        self.speed_x = 5
-        self.speed_y = 4
     def update(self):
         self.x += self.speed_x
         self.y += self.speed_y
@@ -32,7 +55,6 @@ main_socket.bind(('localhost', 10000))
 main_socket.setblocking(0)
 main_socket.listen(5)
 
-sockets = []
 players = []
 is_server_running = True
 pygame.init()
@@ -53,7 +75,7 @@ while is_server_running:
                             random.randint(0, HEIGHT_ROOM),
                             START_SIZE, str(random.randint(0,4)))
         players.append(new_player)
-        #sockets.append(new_socket)
+
     except:
         print("NoAvailable")
 
@@ -61,30 +83,47 @@ while is_server_running:
         try:
             data = p.conn.recv(1024)
             data = data.decode()
-            print("Receive", data)
+            data = find(data)
+            print(data)
+
+            p.change_speed(data)
         except:
             pass
-    # for s in sockets:
-    #     try:
-    #         data =  s.recv(1024)
-    #         data = data.decode()
-    #         print("Receive", data)
-    #     except:
-    #         pass
-    # for s in sockets:
-    #     try:
-    #         s.send('New state'.encode())
-    #     except:
-    #         sockets.remove(s)
-    #         s.close()
-    for p in players:
+        p.update()
+
+    visible_players = [[] for i in range(0,len(players))]
+    for i in range(len(players)):
+        for j in range(i+1, len(players)):
+            dist_x = players[j].x - players[i].x
+            dist_y = players[j].y - players[i].y
+
+            if ((abs(dist_x)<= (players[i].w_vision)//2+players[j].r) and (abs(dist_y)<= (players[i].h_vision)//2+players[j].r)):
+                _x = str(round(dist_x))
+                _y = str(round(dist_y))
+                _r = str(round(players[j].r))
+                _c = players[j].colour
+                visible_players[i].append(_x+' '+_y+' '+_r+' '+_c)
+            if ((abs(dist_x) <= (players[j].w_vision) // 2 + players[i].r) and (
+                    abs(dist_y) <= (players[j].h_vision) // 2 + players[i].r)):
+                _x = str(round(-dist_x))
+                _y = str(round(-dist_y))
+                _r = str(round(players[i].r))
+                _c = players[i].colour
+                visible_players[j].append(_x + ' ' + _y + ' ' + _r + ' ' + _c)
+
+    responce = ['' for i in range (len(players))]
+    for i in range(len(players)):
+        responce[i] = '<'+(','.join(visible_players[i]))+'>'
+
+    for i in range(len(players)):
         try:
-            p.conn.send('New state'.encode())
-            p.errors = 0
+            players[i].conn.send(responce[i].encode())
+            players[i].errors = 0
         except:
-            p.errors += 1
+            players[i].errors += 1
+
     for p in players:
-        if p.errors == 400:
+        if p.errors == 100000:
             p.conn.close()
             players.remove(p)
 
