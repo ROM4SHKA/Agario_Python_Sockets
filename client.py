@@ -10,7 +10,6 @@ def find(strn):
         if strn[i] == '>' and first_o != None:
             close = i
             res = strn[first_o + 1: close]
-            res = list(map(int, res.split(',')))
             return res
     return ''
 
@@ -51,6 +50,7 @@ while is_game_running:
     data = data.decode()
     data = find(data)
     print('receive', data)
+
     sc.fill('grey50')
     pygame.draw.circle(sc, (255, 0, 0), (WIDTH//2, HEIGHT//2), 50)
     pygame.display.update()
