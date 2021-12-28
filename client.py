@@ -1,3 +1,4 @@
+
 import socket
 import  time
 import pygame
@@ -87,4 +88,5 @@ while is_game_running:
     player.draw()
     pygame.display.update()
 pygame.quit()
+
 #python client.py
